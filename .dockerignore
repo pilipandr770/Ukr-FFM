@@ -1,0 +1,13 @@
+# Секреты и локальные артефакты не должны попадать в образ
+.env
+.git
+.gitignore
+.venv
+.local
+__pycache__
+*.py[cod]
+.pytest_cache
+uploads/*
+!uploads/.gitkeep
+docker-compose.yml
+backups

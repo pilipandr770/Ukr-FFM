@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}{{ _("My startups") }} · {{ _("Club") }}{% endblock %}
+
+{% block content %}
+<h1>{{ _("My startups") }}</h1>
+<p class="button-row">
+  <a href="{{ url_for('startups.new') }}" class="button">{{ _("Create project card") }}</a>
+  <a href="{{ url_for('startups.index') }}" class="button button-secondary">{{ _("All startups") }}</a>
+</p>
+
+<div class="grid-cards">
+{% for startup in items %}
+<article class="card project-card">
+  {% if startup.logo_key %}
+    <img class="project-thumb" src="{{ url_for('startups.logo', startup_id=startup.id) }}" alt="" width="320" height="180" loading="lazy">
+  {% endif %}
+  <h2><a href="{{ url_for('startups.detail', startup_id=startup.id) }}">{{ startup.name }}</a></h2>
+  <p class="status-line">
+    {% if startup.status == "approved" %}<span class="pill pill-ok">{{ _("Published") }}</span>
+    {% elif startup.status == "pending" %}<span class="pill pill-warn">{{ _("Waiting for review") }}</span>
+    {% else %}<span class="pill pill-warn">{{ _("Not published") }}</span>{% endif %}
+    {% if startup.deck_key %}<span class="pill">PDF</span>{% endif %}
+  </p>
+  {% if startup.status == "rejected" and startup.rejection_reason %}<p class="small">{{ startup.rejection_reason }}</p>{% endif %}
+  <a class="button button-secondary" href="{{ url_for('startups.edit', startup_id=startup.id) }}">{{ _("Edit") }}</a>
+</article>
+{% else %}
+  <p>{{ _("You have no startups yet.") }}</p>
+{% endfor %}
+</div>
+
+<section>
+  <h2>{{ _("Interest from investors") }}</h2>
+  {% for interest in incoming %}
+  <section class="card">
+    <p><strong>{{ interest.startup.name }}</strong> · {{ interest.created_at.strftime('%d.%m.%Y') }}</p>
+    <p>{{ interest.message }}</p>
+    {% if interest.status == "pending" %}
+      <form method="post" action="{{ url_for('startups.respond', interest_id=interest.id) }}" class="inline-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" name="answer" value="accept" class="button">{{ _("Accept and share my contact") }}</button>
+        <button type="submit" name="answer" value="decline" class="button button-secondary">{{ _("Decline") }}</button>
+      </form>
+    {% else %}
+      <p class="small">{% if interest.status == "accepted" %}{{ _("You accepted. Your contact is shared.") }}{% else %}{{ _("You declined.") }}{% endif %}</p>
+    {% endif %}
+  </section>
+  {% else %}
+    <p>{{ _("No interest yet.") }}</p>
+  {% endfor %}
+</section>
+{% endblock %}

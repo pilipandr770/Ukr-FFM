@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block title %}{{ startup.name }} · {{ _("Startups for investors") }}{% endblock %}
+
+{% block content %}
+<p class="crumbs"><a href="{{ url_for('startups.index') }}">← {{ _("Back to all startups") }}</a></p>
+
+<section class="project-head">
+  {% if startup.logo_key %}
+    <img class="project-cover" src="{{ url_for('startups.logo', startup_id=startup.id) }}" alt="" width="220" height="160">
+  {% endif %}
+  <div>
+    <h1>{{ startup.name }}</h1>
+    {% if startup.tagline %}<p class="lead">{{ startup.tagline }}</p>{% endif %}
+    <p class="status-line">
+      <span class="pill">{{ category_label(startup.category) }}</span>
+      <span class="pill">{{ stage_label(startup.stage) }}</span>
+      {% if funding %}<span class="pill pill-ok">{{ _("Funding goal: %(amount)s", amount=funding) }}</span>{% endif %}
+    </p>
+    <p class="button-row">
+      {% if startup.deck_key %}<a class="button" href="{{ url_for('startups.deck', startup_id=startup.id) }}">{{ _("Download presentation (PDF)") }}</a>{% endif %}
+      {% if startup.website_url %}<a class="button button-secondary" href="{{ startup.website_url }}" rel="noopener nofollow" target="_blank">{{ _("Website") }}</a>{% endif %}
+    </p>
+  </div>
+</section>
+
+{% if is_owner or current_user.is_admin %}
+  <p class="notice">
+    {% if startup.status == "approved" %}{{ _("Published.") }}
+    {% elif startup.status == "pending" %}{{ _("Waiting for review. Members do not see this card yet.") }}
+    {% else %}{{ _("Not published.") }} {{ startup.rejection_reason or '' }}{% endif %}
+    {% if is_owner %}<a href="{{ url_for('startups.edit', startup_id=startup.id) }}">{{ _("Edit") }}</a>{% endif %}
+  </p>
+{% endif %}
+
+<section class="card">
+  <h2>{{ _("What is it?") }}</h2>
+  <p class="prose">{{ startup.description }}</p>
+</section>
+
+{% for key, title in sections %}
+  {% if startup[key] %}
+  <section class="card">
+    <h2>{{ title }}</h2>
+    <p class="prose">{{ startup[key] }}</p>
+  </section>
+  {% endif %}
+{% endfor %}
+
+{% if contact %}
+<section class="card">
+  <h2>{{ _("Contact") }}</h2>
+  <p>{{ _("The founder has accepted your interest. You can reach them at:") }} <a href="mailto:{{ contact }}">{{ contact }}</a></p>
+</section>
+{% endif %}
+
+{% if not is_owner and startup.status == "approved" %}
+<section class="card">
+  <h2>{{ _("Interested?") }}</h2>
+  <p class="small muted">{{ _("Questions about the project? Ask Clubi: it knows the full card and the presentation.") }}</p>
+  {% if not can_interest and not my_interest %}
+    <p class="muted">{{ _("Showing interest is included in a higher plan.") }}</p>
+  {% elif my_interest %}
+    <p>
+      {% if my_interest.status == "pending" %}{{ _("Your interest is with the founder.") }}
+      {% elif my_interest.status == "accepted" %}{{ _("Your interest was accepted.") }}
+      {% else %}{{ _("Your interest was not accepted this time.") }}{% endif %}
+    </p>
+  {% else %}
+    <form method="post" action="{{ url_for('startups.interest', startup_id=startup.id) }}" class="form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="field">
+        <label for="message">{{ _("Your message to the founder") }}</label>
+        <textarea id="message" name="message" rows="4" maxlength="1000"></textarea>
+        <p class="small">{{ _("Your contact details are not shared unless the founder accepts.") }}</p>
+      </div>
+      <button type="submit" class="button">{{ _("Show interest") }}</button>
+    </form>
+  {% endif %}
+</section>
+{% endif %}
+{% endblock %}

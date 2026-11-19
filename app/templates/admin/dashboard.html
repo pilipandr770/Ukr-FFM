@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block title %}{{ _("Admin") }} · {{ _("Club") }}{% endblock %}
+
+{% block content %}
+<h1>{{ _("Admin") }}</h1>
+<nav class="admin-nav">
+  <a href="{{ url_for('admin.users') }}">{{ _("Members") }}</a> ·
+  <a href="{{ url_for('admin.lots') }}">{{ _("Auction lots") }}</a> ·
+  <a href="{{ url_for('admin.startups') }}">{{ _("Startups") }}</a> ·
+  <a href="{{ url_for('admin.travel') }}">{{ _("Travel offers") }}</a> ·
+  <a href="{{ url_for('admin.events') }}">{{ _("Events") }}</a> ·
+  <a href="{{ url_for('admin.miniclubs') }}">{{ _("Mini-Clubs") }}</a> ·
+  <a href="{{ url_for('admin.services_admin') }}">{{ _("Services") }}</a> ·
+  <a href="{{ url_for('admin.audit_log') }}">{{ _("Audit log") }}</a>
+  <a href="{{ url_for('admin.analytics_view') }}">{{ _("Visitor statistics") }}</a> ·
+  <a href="{{ url_for('admin.ai_usage_view') }}">{{ _("AI usage") }}</a> ·
+  <a href="{{ url_for('admin.invites_view') }}">{{ _("Invitations") }}</a>
+</nav>
+
+<section class="card">
+  <h2>{{ _("Members") }}: {{ users_total }}</h2>
+  <ul class="module-list">
+    {% for plan_key, plan in plans.items() %}
+      <li>{{ plan.name }}: {{ by_plan[plan_key] }}</li>
+    {% endfor %}
+  </ul>
+</section>
+
+<section class="card">
+  <h2>{{ _("Needs attention") }}</h2>
+  <ul class="module-list">
+    <li><a href="{{ url_for('admin.users', show='waiting') }}">{{ _("Waiting for identity") }}</a>: {{ waiting_count }}</li>
+    <li><a href="{{ url_for('admin.users', show='expired') }}">{{ _("Plan expired") }}</a>: {{ expired_count }}</li>
+    <li><a href="{{ url_for('admin.users', show='expiring') }}">{{ _("Plan ending soon") }}</a>: {{ expiring|length }}</li>
+  </ul>
+  {% if expiring %}
+  <h3>{{ _("Ending in the next 14 days") }}</h3>
+  <ul class="module-list">
+    {% for member in expiring %}
+      <li><a href="{{ url_for('admin.user_detail', user_id=member.id) }}">{{ member.email }}</a> · {{ plans[member.plan].name if member.plan in plans else member.plan }} · {{ member.paid_until.strftime('%d.%m.%Y') }}</li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+</section>
+
+<section class="card">
+  <h2>{{ _("Identity checks") }}</h2>
+  <ul class="module-list">
+    {% for status, count in by_verification.items() %}
+      <li>{{ status|label }}: {{ count }}</li>
+    {% endfor %}
+  </ul>
+</section>
+
+<section class="card">
+  <h2>{{ _("Open auction lots") }}: {{ lots_open }}</h2>
+</section>
+
+<section class="card">
+  <h2>{{ _("AI models") }}</h2>
+  <ul class="module-list">
+    <li>{{ _("Language model") }}: {{ ai.llm_provider }} · {{ ai.llm_model }} · {% if ai.llm_enabled %}{{ _("on") }}{% else %}{{ _("off") }}{% endif %}</li>
+    <li>{{ _("Embeddings") }}: {{ ai.embedding_name }}</li>
+    <li><a href="{{ url_for('admin.ai_usage_view') }}">{{ _("AI usage") }}</a>: {{ _("today") }} {{ "{:,}".format(ai_summary.today.tokens) }} · {{ _("this month") }} {{ "{:,}".format(ai_summary.month.tokens) }}{% if ai_summary.blocked %} · <strong>{{ _("limit reached, AI answers are paused") }}</strong>{% endif %}</li>
+  </ul>
+  <p class="small">{{ _("Models are set in the server settings. Changing them does not need a code change.") }}</p>
+</section>
+{% endblock %}

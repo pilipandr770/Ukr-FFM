@@ -1,0 +1,123 @@
+from datetime import timedelta
+
+from flask import Blueprint, Response, abort, current_app, jsonify, redirect, render_template, request, url_for
+from flask_login import current_user
+from sqlalchemy import text
+
+from ...extensions import db
+from ..._compat import safe_next
+from ...utils import utcnow
+
+bp = Blueprint("public", __name__)
+
+
+@bp.get("/")
+def index():
+    from config.plans import ASSISTANT_DAILY, PLANS, TOOL_LIMITS
+    from ...services.tools import TOOLS
+
+    return render_template("public/index.html", plans=PLANS, tool_limits=TOOL_LIMITS, assistant_daily=ASSISTANT_DAILY,
+                           compare_plans=("guest", "starter", "growth", "premium"), tool_count=len(TOOLS),
+                           law_counts=_law_counts())
+
+
+def _law_counts():
+    """Сколько законов в корпусе по странам (для цифр на лендинге). Без базы или без корпуса — пусто."""
+    from sqlalchemy import func
+
+    from ...models import Law
+
+    try:
+        return dict(db.session.query(Law.jurisdiction, func.count(Law.slug)).group_by(Law.jurisdiction).all())
+    except Exception:  # noqa: BLE001 - лендинг должен открываться, даже если таблицы законов недоступны
+        db.session.rollback()
+        return {}
+
+
+LEGAL_DOCUMENTS = {"impressum": "impressum", "datenschutz": "datenschutz", "nutzungsbedingungen": "nutzungsbedingungen"}
+
+
+def _legal(document: str):
+    """Юридические тексты по праву Германии. Немецкая версия обязательна, украинская помогает понять её."""
+    from flask import render_template as render
+    from flask_babel import get_locale
+
+    asked = request.args.get("lang")
+    language = asked if asked in ("de", "uk") else ("uk" if str(get_locale()) == "uk" else "de")
+    return render(f"legal/{document}_{language}.html", legal=current_app.config, language=language)
+
+
+@bp.get("/impressum")
+def impressum():
+    return _legal("impressum")
+
+
+@bp.get("/datenschutz")
+def datenschutz():
+    return _legal("datenschutz")
+
+
+@bp.get("/nutzungsbedingungen")
+def nutzungsbedingungen():
+    return _legal("nutzungsbedingungen")
+
+
+@bp.get("/agb")
+def agb():
+    return redirect(url_for("public.nutzungsbedingungen"), code=301)
+
+
+@bp.post("/language")
+def language():
+    locale = request.form.get("locale", "")
+    if locale not in current_app.config["LOCALES_ENABLED"]:
+        abort(400)
+    if current_user.is_authenticated:
+        current_user.locale = locale
+        db.session.commit()
+    response = redirect(safe_next(request.form.get("next")) or url_for("public.index"), code=303)
+    response.set_cookie("locale", locale, max_age=365 * 24 * 60 * 60, httponly=True,
+                        secure=current_app.config["SESSION_COOKIE_SECURE"], samesite="Lax")
+    return response
+
+
+@bp.get("/healthz")
+def healthz():
+    """Проверка для healthcheck контейнера: приложение и база отвечают."""
+    db.session.execute(text("SELECT 1"))
+    return jsonify(status="ok")
+
+
+SITEMAP_ENDPOINTS = ("public.index", "public.impressum", "public.datenschutz", "public.nutzungsbedingungen")
+
+
+@bp.get("/robots.txt")
+def robots_txt():
+    """Публичные страницы открыты, зоны участников и админов закрыты. Адрес карты сайта берётся из BASE_URL."""
+    base = current_app.config["BASE_URL"].rstrip("/")
+    lines = ["User-agent: *", "Allow: /", "Disallow: /app/", "Disallow: /admin/", "Disallow: /api/",
+             "Disallow: /join/", "Disallow: /webhooks/", "Disallow: /language", "",
+             f"Sitemap: {base}/sitemap.xml"]
+    return Response("\n".join(lines) + "\n", mimetype="text/plain")
+
+
+@bp.get("/sitemap.xml")
+def sitemap_xml():
+    """Карта сайта: только страницы, видимые без входа. Язык выбирается кукой, поэтому адрес у языков общий."""
+    base = current_app.config["BASE_URL"].rstrip("/")
+    urls = "".join(f"<url><loc>{base}{url_for(endpoint)}</loc></url>" for endpoint in SITEMAP_ENDPOINTS)
+    xml = ('<?xml version="1.0" encoding="UTF-8"?>\n'
+           f'<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{urls}</urlset>\n')
+    return Response(xml, mimetype="application/xml")
+
+
+@bp.get("/.well-known/security.txt")
+def security_txt():
+    """Контакт для сообщений об уязвимостях (RFC 9116). Срок действия всегда на полгода вперёд."""
+    cfg = current_app.config
+    expires = (utcnow() + timedelta(days=180)).strftime("%Y-%m-%dT%H:%M:%SZ")
+    lines = [f"Contact: mailto:{cfg.get('SECURITY_CONTACT', 'info@andrii-it.de')}",
+             f"Expires: {expires}",
+             "Preferred-Languages: uk, de, en",
+             f"Canonical: {cfg['BASE_URL'].rstrip('/')}/.well-known/security.txt"]
+    return Response("\n".join(lines) + "\n", mimetype="text/plain")

@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+
+{% block title %}{{ _("About me") }} · {{ _("Club") }}{% endblock %}
+
+{% block content %}
+<h1>{{ _("About me") }}</h1>
+<p class="muted">{{ _("The fuller your profile, the better our matching can suggest people who fit you. Each field has a short hint and examples.") }}</p>
+
+<section class="card">
+  <p><strong>{{ _("Profile completeness") }}: {{ percent }} %</strong></p>
+  <progress max="100" value="{{ percent }}" class="progress">{{ percent }} %</progress>
+  {% if matchable %}
+    <p class="small">{{ _("Your profile can be used for matching.") }}</p>
+  {% elif missing %}
+    <p class="small">{{ _("For matching, please also fill in:") }}
+      {% for field in fields if field.key in missing %}{{ field.label }}{% if not loop.last %}, {% endif %}{% endfor %}
+    </p>
+  {% else %}
+    <p class="small">{{ _("You also need to allow matching in your profile. It is off by default.") }}</p>
+    <a class="button button-secondary" href="{{ url_for('profile.privacy') }}">{{ _("Make my choices") }}</a>
+  {% endif %}
+</section>
+
+<form method="post" action="{{ url_for('profile.edit') }}" class="form">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+  {% for field in fields %}
+  <div class="field {% if field.key in errors %}field-error{% endif %}">
+    <label for="{{ field.key }}">{{ field.label }}</label>
+    <p class="small">{{ field.hint }}</p>
+    {% if field.multiline %}
+      <textarea id="{{ field.key }}" name="{{ field.key }}" rows="4" maxlength="{{ field.max_length }}">{{ form.get(field.key, '') if form is not none else profile[field.key] or '' }}</textarea>
+    {% else %}
+      <input id="{{ field.key }}" name="{{ field.key }}" type="text" maxlength="{{ field.max_length }}" value="{{ form.get(field.key, '') if form is not none else profile[field.key] or '' }}">
+    {% endif %}
+    <details class="examples">
+      <summary>{{ _("Show examples") }}</summary>
+      <ul class="module-list">
+        {% for example in field.examples %}<li>{{ example }}</li>{% endfor %}
+      </ul>
+      <p class="small">{{ _("Examples are for orientation only. Write about yourself in your own words.") }}</p>
+    </details>
+  </div>
+  {% endfor %}
+
+
+  <button type="submit" class="button">{{ _("Save") }}</button>
+</form>
+
+<section class="card" id="card">
+  <h2>{{ _("My card") }}</h2>
+  <p class="small">{{ _("Your card is your mini-site in the community. Pick a look, say what you are open to and add your languages and links.") }}
+    <a href="{{ url_for('profile.view', user_id=current_user.id) }}">{{ _("Preview my card") }}</a></p>
+  <form method="post" action="{{ url_for('profile.save_card') }}" class="form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+    <fieldset class="field">
+      <legend>{{ _("Look") }}</legend>
+      <div class="theme-picker">
+        {% for key, label in cover_themes %}
+        <label class="theme-option">
+          <input type="radio" name="cover_theme" value="{{ key }}"{% if (profile.cover_theme or 'violet') == key %} checked{% endif %}>
+          <span class="theme-swatch cover cover-{{ key }}"></span>
+          <span class="small">{{ label }}</span>
+        </label>
+        {% endfor %}
+      </div>
+    </fieldset>
+
+    <fieldset class="field">
+      <legend>{{ _("I am open to") }}</legend>
+      <p class="small">{{ card_hints.open_to }}</p>
+      <div class="check-grid">
+        {% for key, label in open_to_options %}
+        <label class="check-option"><input type="checkbox" name="open_to" value="{{ key }}"{% if key in open_to_selected %} checked{% endif %}> {{ label }}</label>
+        {% endfor %}
+      </div>
+    </fieldset>
+
+    <div class="field">
+      <label for="languages">{{ _("Languages") }}</label>
+      <p class="small">{{ card_hints.languages }}</p>
+      <input id="languages" name="languages" type="text" maxlength="160" value="{{ profile.languages or '' }}" placeholder="{{ _('Ukrainian, German, English') }}">
+    </div>
+    <div class="field">
+      <label for="website_url">{{ _("Website") }}</label>
+      <p class="small">{{ card_hints.website_url }}</p>
+      <input id="website_url" name="website_url" type="url" maxlength="300" value="{{ profile.website_url or '' }}" placeholder="https://">
+    </div>
+    <div class="field">
+      <label for="linkedin_url">{{ _("Professional profile") }}</label>
+      <p class="small">{{ card_hints.linkedin_url }}</p>
+      <input id="linkedin_url" name="linkedin_url" type="url" maxlength="300" value="{{ profile.linkedin_url or '' }}" placeholder="https://">
+    </div>
+    <fieldset class="field">
+      <legend>{{ _("Social networks") }}</legend>
+      <p class="small">{{ card_hints.social }}</p>
+      <div class="social-grid">
+        {% for key, label, _d, _b in networks %}
+        <div class="field">
+          <label for="social_{{ key }}">{{ label }}</label>
+          <input id="social_{{ key }}" name="social_{{ key }}" type="text" maxlength="300" value="{{ social_values.get(key, '') }}" autocomplete="off">
+        </div>
+        {% endfor %}
+      </div>
+      <p class="small">
+        {% if profile.links_public %}{{ _("Your links are shown to all verified members who open your card.") }}
+        {% else %}{{ _("Your links are shown only to members whose contact request you accepted.") }}{% endif %}
+        <a href="{{ url_for('profile.privacy') }}">{{ _("Change who sees them") }}</a>
+      </p>
+    </fieldset>
+
+    <button type="submit" class="button">{{ _("Save my card") }}</button>
+  </form>
+</section>
+
+<section class="card">
+  <h2>{{ _("Photo") }}</h2>
+  <p class="small">{{ photo_hint }}</p>
+  <details class="examples">
+    <summary>{{ _("Show examples") }}</summary>
+    <ul class="module-list">
+      {% for example in photo_examples %}<li>{{ example }}</li>{% endfor %}
+    </ul>
+  </details>
+  {% if profile.photo_key %}
+    <p><img class="avatar" src="{{ url_for('profile.photo', user_id=current_user.id) }}" alt="{{ _('Your photo') }}" width="120" height="120"></p>
+    <form method="post" action="{{ url_for('profile.remove_photo') }}" class="inline-form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button type="submit" class="link-button">{{ _("Remove photo") }}</button>
+    </form>
+  {% endif %}
+  <form method="post" action="{{ url_for('profile.upload_photo') }}" enctype="multipart/form-data" class="form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="field">
+      <label for="photo">{{ _("Choose a photo") }}</label>
+      <input id="photo" name="photo" type="file" accept="image/jpeg,image/png,image/webp">
+    </div>
+    <button type="submit" class="button button-secondary">{{ _("Upload photo") }}</button>
+  </form>
+</section>
+
+<p><a href="{{ url_for('profile.directory') }}">{{ _("Open the community") }}</a> · <a href="{{ url_for('profile.matches') }}">{{ _("My matches") }}</a> · <a href="{{ url_for('profile.privacy') }}">{{ _("Publication and matching") }}</a></p>
+{% endblock %}

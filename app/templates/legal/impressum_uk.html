@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}Impressum · {{ _("Club") }}{% endblock %}
+
+{% block robots %}index, follow{% endblock %}
+
+{% block content %}
+<article class="legal" lang="uk">
+  <h1>Impressum (вихідні дані)</h1>
+  <p class="small muted">Редакція: {{ legal.LEGAL_UPDATED }}</p>
+  <p class="legal-note">Цей текст — переклад для зручності. Юридичну силу має <a href="{{ url_for('public.impressum', lang='de') }}" lang="de" hreflang="de">німецька версія</a>, вона відкривається після вибору німецької мови.</p>
+
+  <h2>Відомості за § 5 DDG</h2>
+  <address>
+    <strong>{{ legal.LEGAL_NAME }}</strong>{% if legal.LEGAL_FORM %} ({{ legal.LEGAL_FORM }}){% endif %}<br>
+    {{ legal.LEGAL_STREET }}<br>
+    {{ legal.LEGAL_CITY }}<br>
+    {{ legal.LEGAL_COUNTRY }}
+  </address>
+  {% if legal.LEGAL_REPRESENTATIVE %}<p>Представник: {{ legal.LEGAL_REPRESENTATIVE }}</p>{% endif %}
+  {% if legal.LEGAL_REGISTER %}<p>Реєстраційний запис: {{ legal.LEGAL_REGISTER }}</p>{% endif %}
+
+  <h2>Контакти</h2>
+  <p>
+    Пошта: <a href="mailto:{{ legal.LEGAL_EMAIL }}">{{ legal.LEGAL_EMAIL }}</a><br>
+    Телефон: {{ legal.LEGAL_PHONE }}<br>
+    Сайт: {{ legal.LEGAL_WEB }}
+  </p>
+
+  {% if legal.LEGAL_VAT_ID %}
+  <h2>Податок на обіг</h2>
+  <p>Ідентифікаційний номер платника ПДВ згідно з § 27a Закону про податок на обіг: {{ legal.LEGAL_VAT_ID }}</p>
+  {% endif %}
+
+  <h2>Відповідальний за зміст згідно з § 18 абз. 2 MStV</h2>
+  <p>{{ legal.LEGAL_NAME }}, адреса зазначена вище.</p>
+
+  <h2>Позасудове врегулювання спорів зі споживачами</h2>
+  <p>Ми не готові й не зобов'язані брати участь у процедурах врегулювання спорів перед споживчою арбітражною комісією (§ 36 VSBG).</p>
+
+  <h2>Матеріали учасників</h2>
+  <p>Профілі, проєкти, зустрічі, мініклуби, поїздки та лоти створюють учасники. За ці матеріали відповідають самі учасники. Частину матеріалів ми перевіряємо до публікації, постійного нагляду за ними немає. Якщо матеріал здається вам незаконним чи недоречним, напишіть на вказану вище пошту. Ми перевіримо повідомлення й без зволікань вживемо заходів.</p>
+
+  <h2>Про функції на основі ШІ</h2>
+  <p>Помічник Clubi, пошук за законами, перевірка сайтів і панель ринку працюють зі штучним інтелектом. Їхні результати — перша орієнтація. Вони не замінюють юридичну, податкову, фінансову консультацію чи консультацію з безпеки.</p>
+
+  <h2>Умови використання та захист даних</h2>
+  <p>
+    <a href="{{ url_for('public.nutzungsbedingungen') }}">Умови використання</a> ·
+    <a href="{{ url_for('public.datenschutz') }}">Політика конфіденційності</a>
+  </p>
+</article>
+{% endblock %}

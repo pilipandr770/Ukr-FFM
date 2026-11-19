@@ -1,0 +1,125 @@
+name: ukr-ffm
+
+# Наружу публикует только caddy (80/443). db и app — во внутренней сети.
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: club
+      POSTGRES_USER: club
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Задайте POSTGRES_PASSWORD в .env}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      # Создаёт club_test для тестов; срабатывает только при пустом томе
+      - ./deploy/postgres/init-test-db.sql:/docker-entrypoint-initdb.d/10-test-db.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U club -d club"]
+      interval: 30s
+      timeout: 3s
+      retries: 10
+      start_period: 20s
+
+  migrate:
+    # Тот же образ, что и app: одинаковые аргументы сборки, иначе они перезаписывают друг друга
+    build:
+      context: .
+      args:
+        INSTALL_DEV: ${INSTALL_DEV:-0}
+    image: ukr-ffm-app:local
+    command: ["flask", "db", "upgrade"]
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql+psycopg://club:${POSTGRES_PASSWORD}@db:5432/club
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"
+
+  app:
+    build:
+      context: .
+      args:
+        INSTALL_DEV: ${INSTALL_DEV:-0}
+    image: ukr-ffm-app:local
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql+psycopg://club:${POSTGRES_PASSWORD}@db:5432/club
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    # Один воркер с потоками и лимит CPU: VPS общий, нагрузку держим низкой
+    command: ["gunicorn", "--workers", "1", "--threads", "4", "--bind", "0.0.0.0:8000", "--access-logfile", "-", "wsgi:app"]
+    cpus: "0.75"
+    read_only: true
+    tmpfs:
+      - /tmp
+    volumes:
+      - uploads:/app/uploads
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8000/healthz', timeout=3).status == 200 else 1)"]
+      interval: 60s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+
+  # Периодические задачи: закрытие аукционных лотов по времени и рассылка итогов (не cron на хосте)
+  scheduler:
+    image: ukr-ffm-app:local
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql+psycopg://club:${POSTGRES_PASSWORD}@db:5432/club
+    # Независимые циклы: закрытие лотов раз в 5 минут (аукцион пока выключен; каждый запуск flask грузит приложение), еженедельная синхронизация законов, раз в час напоминания о профиле
+    command: ["sh", "-c", "(while true; do flask laws-sync-if-due; sleep 3600; done) & (while true; do flask send-onboarding-nudges; sleep 3600; done) & while true; do flask close-auctions; sleep 300; done"]
+    cpus: "0.5"
+    depends_on:
+      app:
+        condition: service_healthy
+    read_only: true
+    tmpfs:
+      - /tmp
+    volumes:
+      - uploads:/app/uploads
+    restart: unless-stopped
+
+  # Ночной дамп базы (03:00 UTC) в ./backups, по воскресеньям с проверкой восстановления. Порты не публикует.
+  # Работает от root внутри контейнера: bind-каталог на сервере принадлежит root; доступ к db только по внутренней сети.
+  # Копию на другой компьютер забирает deploy/backup/pull-backups.sh.
+  backup:
+    image: pgvector/pgvector:pg16
+    entrypoint: ["sh", "/backup/run.sh"]
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      BACKUP_KEEP_DAYS: ${BACKUP_KEEP_DAYS:-14}
+    volumes:
+      - ./deploy/backup:/backup:ro
+      - ./backups:/backups
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "find /backups/.last_ok -mmin -1800 | grep -q ."]
+      interval: 1h
+      timeout: 10s
+      retries: 1
+      start_period: 10m
+    restart: unless-stopped
+
+  caddy:
+    image: caddy:2.8.4-alpine
+    restart: unless-stopped
+    # Только локально: TLS и публичный вход делает Traefik на сервере
+    ports:
+      - "127.0.0.1:${CADDY_PORT:-8081}:80"
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+    depends_on:
+      app:
+        condition: service_healthy
+
+volumes:
+  pgdata:
+  uploads:
+  caddy_data:

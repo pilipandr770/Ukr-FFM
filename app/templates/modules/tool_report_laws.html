@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}{{ spec.title }} · {{ _("Report") }}{% endblock %}
+
+{% block content %}
+<h1>{{ spec.title }}</h1>
+<p class="muted">{{ run.created_at.strftime('%d.%m.%Y %H:%M') }}</p>
+<p><a href="{{ url_for('services.tools_index') }}">{{ _("All tools") }}</a> ·
+   <a href="{{ url_for('services.tool_page', key='laws') }}">{{ _("New search") }}</a></p>
+
+<section class="card">
+  <h2>{{ _("Your question") }}</h2>
+  <p>{{ run.subject }}</p>
+  <p><span class="pill">{{ pack.code }} · {{ pack.name }}</span></p>
+  <p class="notice">{{ pack.disclaimer }}</p>
+  <p class="notice">{{ _("This is not legal advice. The explanations were written by an AI and only describe what the quoted text says. They do not assess your case.") }}</p>
+  {% if pack.rtl %}<p class="small muted">{{ pack.corpus_note }}</p>{% endif %}
+  {% if report.hinweis %}<p>{{ report.hinweis }}</p>{% endif %}
+</section>
+
+{% set explained = {} %}
+{% for e in report.erlaeuterungen %}{% set known = explained.update({e.id: e.text}) %}{% endfor %}
+
+{% for hit in result.hits %}
+  {% if not report.ai or hit.id not in report.nicht_passend %}
+  <section class="card">
+    <h2 lang="{{ pack.language }}"{% if pack.rtl %} dir="rtl"{% endif %}>{{ hit.law_abbreviation or hit.slug }} {{ hit.enbez }}{% if hit.titel %} · {{ hit.titel }}{% endif %}</h2>
+    <p class="small muted"><span lang="{{ pack.language }}"{% if pack.rtl %} dir="rtl"{% endif %}>{{ hit.law_title }}</span>{% if hit.category %} · {{ hit.category|label }}{% endif %}</p>
+    <blockquote class="quote{% if pack.rtl %} quote-law{% endif %}" lang="{{ pack.language }}"{% if pack.rtl %} dir="rtl"{% endif %}>{{ hit.text }}</blockquote>
+    {% if hit.source_url %}<p class="small"><a href="{{ hit.source_url }}" rel="noopener noreferrer" target="_blank">{{ pack.source_label }}</a>
+      {% if pack.rtl and hit.source_version %}<span class="muted"> · {{ hit.source_version }}</span>{% endif %}</p>{% endif %}
+    {% if pack.rtl and hit.stand %}<p class="small muted" lang="{{ pack.language }}" dir="rtl">{{ hit.stand|join(' · ') }}</p>{% endif %}
+    {% if explained.get(hit.id) %}
+      <p><strong>{{ _("What the text says") }}:</strong> {{ explained[hit.id] }}</p>
+    {% endif %}
+  </section>
+  {% endif %}
+{% endfor %}
+
+{% if assistant_on and result.hits %}
+<section class="card" id="law-chat">
+  <h2>{{ _("Ask Clubi about these provisions") }}</h2>
+  <p class="small muted">{{ _("Clubi sees the provisions above. You can ask in your own language. Clubi explains what the text says and helps you prepare questions for a lawyer. It does not assess your individual case.") }}</p>
+  <p class="chips">
+    <button type="button" class="button button-secondary" data-assistant-ask="{{ _('Explain these provisions in simple words.') }}">{{ _("Explain in simple words") }}</button>
+    <button type="button" class="button button-secondary" data-assistant-ask="{{ _('What are the conditions and exceptions in these provisions?') }}">{{ _("Conditions and exceptions") }}</button>
+    <button type="button" class="button button-secondary" data-assistant-ask="{{ _('Which questions should I ask a lawyer about this?') }}">{{ _("Questions for a lawyer") }}</button>
+    <button type="button" class="button button-secondary" data-assistant-ask="{{ _('Summarize the key points of these provisions in a short list.') }}">{{ _("Key points") }}</button>
+  </p>
+</section>
+{% endif %}
+
+{% if report.ai and report.nicht_passend %}
+<p class="small muted">{{ _("Further results were found but do not match your question closely and are hidden.") }}</p>
+{% endif %}
+{% endblock %}
