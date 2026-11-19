@@ -59,6 +59,20 @@ DEFAULT_SERVICES = (
                      "und liefern Nutzungsrichtlinie und Schulung.",
          benefits="Überblick über eingesetzte KI-Tools\nNutzungsrichtlinie für dein Team\nNachweis der KI-Kompetenz",
          price_hint="Paketpreis"),
+    dict(slug="claude-code-einrichtung", sort=5, title="Claude Code: Einrichtung & effektive Nutzung",
+         summary="Du willst mit Claude Code schneller arbeiten, weißt aber nicht, wie du es einrichtest und sinnvoll "
+                 "einsetzt? Der Entwickler und Admin dieses Clubs zeigt dir Einstellungen, Arbeitsweise und typische "
+                 "Stolpersteine.",
+         description="Dieser Club wurde gemeinsam von seinem Entwickler und Claude Code gebaut. Aus dieser Praxis "
+                     "gibt Andrii Pylypchuk sein Wissen weiter: Wie richtest du Claude Code für dein Projekt ein, "
+                     "welche Einstellungen, Berechtigungen und Projektregeln (CLAUDE.md) lohnen sich, wie formulierst "
+                     "du Aufgaben, damit das Ergebnis passt, und wie prüfst du, was die KI geliefert hat. Das Angebot "
+                     "richtet sich an Gründer:innen, Selbstständige und kleine Teams ohne tiefes Technikwissen. Es "
+                     "ist eine Einführung und Begleitung, keine Garantie für ein bestimmtes Ergebnis.",
+         benefits="Sinnvolle Einrichtung statt Ausprobieren auf eigene Faust\nKlare Regeln für sicheres Arbeiten "
+                  "(Berechtigungen, Geheimnisse, Prüfung der Ergebnisse)\nPraxisbeispiele aus einem echten Projekt\n"
+                  "Mehr Wirkung pro Stunde und pro Token",
+         price_hint="Erstgespräch kostenlos, danach nach Aufwand"),
 )
 
 
