@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-11-19 21:33+0000\n"
+"POT-Creation-Date: 2026-11-19 22:36+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -2585,20 +2585,20 @@ msgstr ""
 msgid "Your account and your data have been deleted."
 msgstr ""
 
-#: app/blueprints/member/__init__.py:126 app/templates/public/index.html:285
+#: app/blueprints/member/__init__.py:126 app/templates/public/index.html:290
 msgid ""
 "Everything in Guest, plus partner services and website tools, law search "
 "and market panel, booking and creating trips, creating and joining "
 "meetings, and mini-clubs."
 msgstr ""
 
-#: app/blueprints/member/__init__.py:128 app/templates/public/index.html:291
+#: app/blueprints/member/__init__.py:128 app/templates/public/index.html:296
 msgid ""
 "Everything in Starter, plus publishing your startup for investors and "
 "offers for operators and agents."
 msgstr ""
 
-#: app/blueprints/member/__init__.py:129 app/templates/public/index.html:297
+#: app/blueprints/member/__init__.py:129 app/templates/public/index.html:302
 msgid "Everything in Growth, plus the auction."
 msgstr ""
 
@@ -2748,7 +2748,7 @@ msgstr ""
 #: app/templates/modules/auction_list.html:3
 #: app/templates/modules/auction_list.html:6
 #: app/templates/modules/auction_mine.html:3
-#: app/templates/public/index.html:254 app/templates/public/index.html:354
+#: app/templates/public/index.html:254 app/templates/public/index.html:359
 msgid "Auction"
 msgstr ""
 
@@ -3249,8 +3249,8 @@ msgstr ""
 msgid "First revenue"
 msgstr ""
 
-#: app/modules/startups/labels.py:19 app/templates/public/index.html:288
-#: app/templates/public/index.html:309 config/plans.py:25
+#: app/modules/startups/labels.py:19 app/templates/public/index.html:293
+#: app/templates/public/index.html:314 config/plans.py:25
 msgid "Growth"
 msgstr ""
 
@@ -5446,7 +5446,7 @@ msgstr ""
 msgid "By feature"
 msgstr ""
 
-#: app/templates/admin/ai_usage.html:48 app/templates/public/index.html:306
+#: app/templates/admin/ai_usage.html:48 app/templates/public/index.html:311
 msgid "Feature"
 msgstr ""
 
@@ -6678,7 +6678,7 @@ msgstr ""
 msgid "Back to my account"
 msgstr ""
 
-#: app/templates/member/plan.html:8 app/templates/public/index.html:275
+#: app/templates/member/plan.html:8 app/templates/public/index.html:280
 msgid "Test mode: the prices are a preview and nothing is charged yet."
 msgstr ""
 
@@ -6757,8 +6757,8 @@ msgid ""
 msgstr ""
 
 #: app/templates/member/plan.html:56 app/templates/modules/tool_form.html:122
-#: app/templates/public/index.html:283 app/templates/public/index.html:289
-#: app/templates/public/index.html:295
+#: app/templates/public/index.html:288 app/templates/public/index.html:294
+#: app/templates/public/index.html:300
 msgid "per month"
 msgstr ""
 
@@ -9546,7 +9546,7 @@ msgid "Is my data safe?"
 msgstr ""
 
 #: app/templates/partials/public_assistant.html:39
-#: app/templates/public/index.html:23 app/templates/public/index.html:404
+#: app/templates/public/index.html:23 app/templates/public/index.html:409
 msgid "Become a member"
 msgstr ""
 
@@ -9626,7 +9626,7 @@ msgstr ""
 msgid "Everything the club offers"
 msgstr ""
 
-#: app/templates/public/index.html:62 app/templates/public/index.html:273
+#: app/templates/public/index.html:62 app/templates/public/index.html:278
 msgid "Plans"
 msgstr ""
 
@@ -10073,134 +10073,147 @@ msgid ""
 "all your data."
 msgstr ""
 
+#: app/templates/public/index.html:273
+msgid "Built together with Claude Code"
+msgstr ""
+
 #: app/templates/public/index.html:274
+msgid ""
+"The club was built by its developer together with Claude Code, an AI "
+"programming assistant from Anthropic. The developer decides and checks "
+"the result, the AI helps to write the code. Members can book an "
+"introduction to Claude Code as a partner service: set-up, safe working "
+"rules and how to get the most out of it."
+msgstr ""
+
+#: app/templates/public/index.html:279
 msgid ""
 "Access depends on the plan. Prices are in euros, including VAT where it "
 "applies. You can cancel at any time."
 msgstr ""
 
-#: app/templates/public/index.html:278 app/templates/public/index.html:307
+#: app/templates/public/index.html:283 app/templates/public/index.html:312
 #: config/plans.py:23
 msgid "Guest"
 msgstr ""
 
-#: app/templates/public/index.html:279
+#: app/templates/public/index.html:284
 msgid ""
 "Free. Write your profile, read the member directory, see suggested "
 "matches, browse startups, trips, meetings and mini-clubs, ask Clubi and "
 "ask for contact."
 msgstr ""
 
-#: app/templates/public/index.html:282 app/templates/public/index.html:308
+#: app/templates/public/index.html:287 app/templates/public/index.html:313
 #: config/plans.py:24
 msgid "Starter"
 msgstr ""
 
-#: app/templates/public/index.html:284 app/templates/public/index.html:290
-#: app/templates/public/index.html:296
+#: app/templates/public/index.html:289 app/templates/public/index.html:295
+#: app/templates/public/index.html:301
 #, python-format
 msgid "or %(price)s per year, two months free"
 msgstr ""
 
-#: app/templates/public/index.html:294 app/templates/public/index.html:310
+#: app/templates/public/index.html:299 app/templates/public/index.html:315
 #: config/plans.py:26
 msgid "Premium"
 msgstr ""
 
-#: app/templates/public/index.html:301
+#: app/templates/public/index.html:306
 msgid "What is included in each plan"
 msgstr ""
 
-#: app/templates/public/index.html:315
+#: app/templates/public/index.html:320
 msgid ""
 "Profile, member directory, suggested matches, browsing startups, trips "
 "and meetings"
 msgstr ""
 
-#: app/templates/public/index.html:316 app/templates/public/index.html:340
-#: app/templates/public/index.html:345 app/templates/public/index.html:351
-#: app/templates/public/index.html:358
+#: app/templates/public/index.html:321 app/templates/public/index.html:345
+#: app/templates/public/index.html:350 app/templates/public/index.html:356
+#: app/templates/public/index.html:363
 msgid "Included"
 msgstr ""
 
-#: app/templates/public/index.html:319
+#: app/templates/public/index.html:324
 msgid "Questions to Clubi per day"
 msgstr ""
 
-#: app/templates/public/index.html:323
+#: app/templates/public/index.html:328
 msgid "Law search, runs per month"
 msgstr ""
 
-#: app/templates/public/index.html:324 app/templates/public/index.html:329
-#: app/templates/public/index.html:334 app/templates/public/index.html:339
-#: app/templates/public/index.html:344 app/templates/public/index.html:349
-#: app/templates/public/index.html:350 app/templates/public/index.html:355
-#: app/templates/public/index.html:356 app/templates/public/index.html:357
+#: app/templates/public/index.html:329 app/templates/public/index.html:334
+#: app/templates/public/index.html:339 app/templates/public/index.html:344
+#: app/templates/public/index.html:349 app/templates/public/index.html:354
+#: app/templates/public/index.html:355 app/templates/public/index.html:360
+#: app/templates/public/index.html:361 app/templates/public/index.html:362
 msgid "Not included"
 msgstr ""
 
-#: app/templates/public/index.html:328
+#: app/templates/public/index.html:333
 msgid ""
 "Website checks (SEO, legal notice, security), runs per month for each "
 "check"
 msgstr ""
 
-#: app/templates/public/index.html:333
+#: app/templates/public/index.html:338
 msgid "Market panel with AI personas, runs per month"
 msgstr ""
 
-#: app/templates/public/index.html:338
+#: app/templates/public/index.html:343
 msgid "Partner services with member conditions"
 msgstr ""
 
-#: app/templates/public/index.html:343
+#: app/templates/public/index.html:348
 msgid "Create and join meetings and mini-clubs, book trips"
 msgstr ""
 
-#: app/templates/public/index.html:348
+#: app/templates/public/index.html:353
 msgid "Publish your startup for investors, offer trips"
 msgstr ""
 
-#: app/templates/public/index.html:366
+#: app/templates/public/index.html:371
 msgid "Questions"
 msgstr ""
 
-#: app/templates/public/index.html:368
+#: app/templates/public/index.html:373
 msgid "Why do I need an identity check?"
 msgstr ""
 
-#: app/templates/public/index.html:369
+#: app/templates/public/index.html:374
 msgid ""
 "So that only real people aged 18 and over are in the club. Stripe runs "
 "the check. We only receive the result."
 msgstr ""
 
-#: app/templates/public/index.html:372
+#: app/templates/public/index.html:377
 msgid "Who can see my profile?"
 msgstr ""
 
-#: app/templates/public/index.html:373
+#: app/templates/public/index.html:378
 msgid ""
 "Only verified members, and only if you agreed that your profile appears "
 "in the directory."
 msgstr ""
 
-#: app/templates/public/index.html:376
+#: app/templates/public/index.html:381
 msgid "How does the AI matching work?"
 msgstr ""
 
-#: app/templates/public/index.html:377
+#: app/templates/public/index.html:382
 msgid ""
 "It compares what you need with what others offer. The suggestions are "
 "hints, not guarantees. Your texts go to AI services only if you agreed to"
 " matching."
 msgstr ""
 
-#: app/templates/public/index.html:380
+#: app/templates/public/index.html:385
 msgid "What does membership cost, and can I cancel?"
 msgstr ""
 
-#: app/templates/public/index.html:381
+#: app/templates/public/index.html:386
 #, python-format
 msgid ""
 "The Guest plan is free after your identity check. Paid plans start at "
@@ -10209,55 +10222,55 @@ msgid ""
 "period."
 msgstr ""
 
-#: app/templates/public/index.html:384
+#: app/templates/public/index.html:389
 msgid "Can I try the club before I pay?"
 msgstr ""
 
-#: app/templates/public/index.html:385
+#: app/templates/public/index.html:390
 msgid ""
 "Yes. With the free Guest plan you can write your profile, read the member"
 " directory, see suggested matches, browse projects, trips and meetings "
 "and ask Clubi. You can upgrade at any time."
 msgstr ""
 
-#: app/templates/public/index.html:388
+#: app/templates/public/index.html:393
 msgid "Which languages does the club speak?"
 msgstr ""
 
-#: app/templates/public/index.html:389
+#: app/templates/public/index.html:394
 msgid ""
 "The site is available in Ukrainian and German. Clubi answers in the "
 "language of your question. German law texts are shown in the original, "
 "with an explanation in your language."
 msgstr ""
 
-#: app/templates/public/index.html:392
+#: app/templates/public/index.html:397
 msgid "Is the law search legal advice?"
 msgstr ""
 
-#: app/templates/public/index.html:393
+#: app/templates/public/index.html:398
 msgid ""
 "No. It finds provisions, quotes them and explains what the text says. It "
 "never assesses your individual case and does not include case law. Use it"
 " to prepare for a meeting with a lawyer, who gives you a binding opinion."
 msgstr ""
 
-#: app/templates/public/index.html:396
+#: app/templates/public/index.html:401
 msgid "Does the club handle payments?"
 msgstr ""
 
-#: app/templates/public/index.html:397
+#: app/templates/public/index.html:402
 msgid ""
 "Plan fees are paid to the club by card through Stripe; the club never "
 "sees your card details. The club does not hold money between members: "
 "payments between members are arranged directly."
 msgstr ""
 
-#: app/templates/public/index.html:402
+#: app/templates/public/index.html:407
 msgid "Ready to start?"
 msgstr ""
 
-#: app/templates/public/index.html:403
+#: app/templates/public/index.html:408
 msgid ""
 "Confirm your identity, write your profile and see your first matches. The"
 " Guest plan is free."
