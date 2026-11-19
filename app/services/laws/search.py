@@ -97,6 +97,22 @@ def _text_rows(query: str, category: str, limit: int, jurisdiction: str) -> list
     return [dict(row) for row in rows]
 
 
+ANNEX_FACTOR = 0.9        # Anlagen (Tabellen, Branchenverzeichnisse) sind selten die gesuchte Norm
+UNCLASSIFIED_FACTOR = 0.92  # Gesetze ohne Rechtsgebiet (meist Sonderrecht einzelner Branchen)
+
+
+def _rank(row: dict, law: Law | None) -> float:
+    """Sortierwert eines Treffers: Ähnlichkeit, leicht abgewertet für Anlagen und Gesetze ohne Rechtsgebiet.
+
+    Der angezeigte score bleibt die reine Ähnlichkeit; nur die Reihenfolge ändert sich."""
+    score = float(row["score"])
+    if (row.get("enbez") or "").lower().startswith("anlage"):
+        score *= ANNEX_FACTOR
+    if law is not None and law.category == "Unclassified":
+        score *= UNCLASSIFIED_FACTOR
+    return score
+
+
 def search(query: str, category: str = "", k: int = 6, jurisdiction: str = "DE") -> list[dict]:
     """Treffer mit vollem Paragraphentext. Reihenfolge: direkte Fundstelle, dann Vektorsuche (sonst Volltext).
 
@@ -111,6 +127,7 @@ def search(query: str, category: str = "", k: int = 6, jurisdiction: str = "DE")
     if not found:
         found = _text_rows(topic, category, k * 5, jurisdiction)
     laws = {law.slug: law for law in Law.query.filter(Law.slug.in_({r["slug"] for r in raw + found})).all()} if raw or found else {}
+    found.sort(key=lambda r: _rank(r, laws.get(r["slug"])), reverse=True)
     out, seen = [], set()
     for row in raw + found:
         key = (row["slug"], row["enbez"] or row["titel"] or row["text"][:60])

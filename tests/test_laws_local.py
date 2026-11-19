@@ -250,3 +250,15 @@ def test_tool_stays_hidden_without_corpus_and_service(app, client):
     login(client, "starter@example.com")
 
     assert client.get("/services/tools/laws").status_code == 404
+
+
+def test_ranking_demotes_annexes_and_unclassified_laws():
+    main = Law(slug="bgb", category="Zivilrecht")
+    odd = Law(slug="sokasig_2", category="Unclassified")
+    paragraph = {"score": 0.70, "enbez": "§ 622"}
+    annex_of_odd_law = {"score": 0.74, "enbez": "Anlage 7"}
+
+    assert law_search._rank(paragraph, main) == 0.70
+    assert law_search._rank(annex_of_odd_law, odd) < law_search._rank(paragraph, main)
+    # Der angezeigte Wert bleibt die reine Ähnlichkeit
+    assert annex_of_odd_law["score"] == 0.74
