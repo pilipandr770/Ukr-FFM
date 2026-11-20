@@ -73,6 +73,19 @@ DEFAULT_SERVICES = (
                   "(Berechtigungen, Geheimnisse, Prüfung der Ergebnisse)\nPraxisbeispiele aus einem echten Projekt\n"
                   "Mehr Wirkung pro Stunde und pro Token",
          price_hint="Erstgespräch kostenlos, danach nach Aufwand"),
+    dict(slug="online-shop", sort=6, active=False, title="Eigener Online-Shop mit KI-Verkäufer",
+         summary="Starte deinen eigenen Online-Shop mit Produktkatalog, Warenkorb, Kartenzahlung und einem "
+                 "KI-Verkäufer, der Fragen deiner Kundschaft beantwortet. Eigene Adresse, DSGVO-Seiten inklusive.",
+         description="Die Shop-Plattform SmartShop gehört zum selben Anbieter wie dieser Club und läuft getrennt "
+                     "vom Club. Jeder Shop bekommt eine eigene Adresse (Subdomain oder eigene Domain), Katalog, "
+                     "Warenkorb und Kasse. Zahlungen laufen über Stripe direkt auf dein Konto, der Club nimmt kein "
+                     "Geld an. Der eingebaute KI-Verkäufer kennt dein Sortiment und Bestellstatus. Auf Wunsch "
+                     "mit Versand über DHL oder UPS, Shop auf Ukrainisch, Deutsch und Englisch. Impressum, AGB und "
+                     "Datenschutz legst du für deinen Shop selbst an und bist als Händler:in dafür verantwortlich. "
+                     "Der Zugang ist ein eigenes Abo bei SmartShop, nicht Teil deines Club-Tarifs.",
+         benefits="Shop mit Kasse und Kartenzahlung in kurzer Zeit startklar\nKI-Verkäufer beantwortet Kundenfragen\n"
+                  "Mehrsprachig: Ukrainisch, Deutsch, Englisch\nZahlungen direkt auf dein Stripe-Konto",
+         price_hint="eigenes Monatsabo mit Testphase, Preise im Erstgespräch"),
 )
 
 
@@ -82,8 +95,8 @@ def seed_default_services() -> int:
     for item in DEFAULT_SERVICES:
         if Service.query.filter_by(slug=item["slug"]).first():
             continue
-        db.session.add(Service(member_benefit=BENEFIT, provider_name=PROVIDER, provider_email=EMAIL,
-                               active=True, **item))
+        fields = {"member_benefit": BENEFIT, "provider_name": PROVIDER, "provider_email": EMAIL, "active": True, **item}
+        db.session.add(Service(**fields))
         created += 1
     db.session.commit()
     return created
